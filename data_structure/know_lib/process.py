@@ -20,7 +20,7 @@ def parse_links_and_content_from_file(file_path):
         matches = re.findall(r'\[\[(.*?)\]\]', content)
         links.extend([match for match in matches if match != '📄'] if matches else matches)  
         references.extend([match for match in matches if match == '📄'] if matches else matches)
-        cleaned_content = re.sub(r'\[\[.*?\]\]', '', content)
+        cleaned_content = re.sub(r'\[\[.*?\]\]', '', content).replace('- \n', '')
 
     return links, cleaned_content, references
 
