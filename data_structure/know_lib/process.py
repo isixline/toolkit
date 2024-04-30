@@ -25,7 +25,7 @@ def parse_links_and_content_from_file(file_path):
     return links, cleaned_content, references
 
 def is_exclude_file(file_name):
-    exclude_file_prefix_list  = ['🖇️', '📍', '🎉']
+    exclude_file_prefix_list =  os.getenv('KNOW_LIB_EXCLUDE_FILE_PREFIX_LIST')
     for prefix in exclude_file_prefix_list:
         if file_name.startswith(prefix):
             return True
@@ -52,14 +52,14 @@ def find_nodes(directory):
         })
     return nodes
 
-def set_category(nodes):
+def set_category(nodes, categories, default_category):
     for node in nodes:
         first_letter = node['name'][0]
 
-        if first_letter.isdigit() or first_letter.isalpha():
-            category = '💭'
-        else:
+        if first_letter in categories:
             category = first_letter
+        else:
+            category = default_category
 
         node['category'] = category
 
@@ -68,10 +68,13 @@ def set_category(nodes):
 
 def output_graph(directory, output_file):
     nodes = find_nodes(directory)
-    nodes = set_category(nodes)
+
+    categories = os.getenv('KNOW_LIB_CATEGORIES').split(',')
+    default_category = os.getenv('KNOW_LIB_DEFAULT_CATEGORY')
+    nodes = set_category(nodes, categories, default_category)
 
     with open(output_file, 'w', encoding='utf-8') as f:
-        json.dump({'nodes': nodes}, f, ensure_ascii=False, indent=4)
+        json.dump({'categories': categories , 'nodes': nodes}, f, ensure_ascii=False, indent=4)
 
 def handle():
     load_dotenv()
