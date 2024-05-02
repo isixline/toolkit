@@ -54,14 +54,11 @@ def find_nodes(directory):
 
 def set_category(nodes, categories, default_category):
     for node in nodes:
-        first_letter = node['name'][0]
-
-        if first_letter in categories:
-            category = first_letter
-        else:
-            category = default_category
-
-        node['category'] = category
+        node['category'] = default_category
+        for category in categories:
+            if category in node['name']:
+                node['category'] = category
+                break            
 
     return nodes
         
