@@ -3,6 +3,8 @@ import re
 import json
 from dotenv import load_dotenv
 
+load_dotenv()
+
 def find_markdown_files(directory):
     md_files = []
     for root, dirs, files in os.walk(directory):
@@ -62,24 +64,21 @@ def set_category(nodes, categories, default_category):
 
     return nodes
         
-
-def output_graph(directory, output_file):
+def collate_graph():
+    directory = os.getenv('KNOW_LIB_FILE_PATH') 
     nodes = find_nodes(directory)
-
     categories = os.getenv('KNOW_LIB_CATEGORIES').split(',')
     default_category = os.getenv('KNOW_LIB_DEFAULT_CATEGORY')
     nodes = set_category(nodes, categories, default_category)
+    return {'categories': categories , 'nodes': nodes}
 
+def output_graph(graph, output_file):
     with open(output_file, 'w', encoding='utf-8') as f:
-        json.dump({'categories': categories , 'nodes': nodes}, f, ensure_ascii=False, indent=4)
-
-def handle():
-    load_dotenv()
-    directory = os.getenv('KNOW_LIB_FILE_PATH') 
-    output_file = './temp/know_lib.json' 
-    output_graph(directory, output_file)
-    print(f"output with {output_file}")
-    return output_file
+        json.dump(graph, f, ensure_ascii=False, indent=4)
+    
 
 if __name__ == '__main__':
-    handle()
+    graph = collate_graph()
+    output_file = './temp/know_lib.json' 
+    output_graph(graph, output_file)
+    print(f"output with {output_file}")
