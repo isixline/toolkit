@@ -26,21 +26,20 @@ def parse_links_and_content_from_file(file_path):
 
     return links, cleaned_content, references
 
-def is_exclude_file(file_name):
-    exclude_file_prefix_list =  os.getenv('KNOW_LIB_EXCLUDE_FILE_PREFIX_LIST')
+def is_exclude_file(file_name, exclude_file_prefix_list):
     for prefix in exclude_file_prefix_list:
         if file_name.startswith(prefix):
             return True
         
     return False
 
-def find_nodes(directory):
+def find_nodes(directory, exclude_file_prefix_list):
     nodes = []
     markdown_files = find_markdown_files(directory)
 
     for file_path in markdown_files:
         file_name = os.path.basename(file_path)
-        if is_exclude_file(file_name):
+        if is_exclude_file(file_name, exclude_file_prefix_list):
             continue
         file_name_without_extension = file_name[:-3]
         
@@ -63,14 +62,25 @@ def set_category(nodes, categories, default_category):
                 break            
 
     return nodes
+
+def get_config():
+    with open('config.json', 'r') as f:
+        config = json.load(f)
+    return config
         
 def collate_graph():
     directory = os.getenv('KNOW_LIB_FILE_PATH') 
-    nodes = find_nodes(directory)
-    categories = os.getenv('KNOW_LIB_CATEGORIES').split(',')
-    default_category = os.getenv('KNOW_LIB_DEFAULT_CATEGORY')
+    config = get_config()
+    exclude_file_prefix_list = config['excludeFilePrefixList']
+    categories = config['categories']
+    default_category = config['defaultCategory']
+    workspaces = config['workspaces']
+
+    nodes = find_nodes(directory, exclude_file_prefix_list)
+    
     nodes = set_category(nodes, categories, default_category)
-    return {'categories': categories , 'nodes': nodes}
+    
+    return {'categories': categories , 'workspaces': workspaces, 'nodes': nodes}
 
 def output_graph(graph, output_file):
     with open(output_file, 'w', encoding='utf-8') as f:
