@@ -64,7 +64,8 @@ def set_category(nodes, categories, default_category):
     return nodes
 
 def get_config():
-    with open('config.json', 'r') as f:
+    configPath = os.getenv('KNOW_LIB_CONFIG_PATH') 
+    with open(configPath, 'r') as f:
         config = json.load(f)
     return config
         
